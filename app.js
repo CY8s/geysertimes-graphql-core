@@ -66,7 +66,13 @@ function getGeyserByID (id) {
 }
 
 function getGeysersByID ({ ids }) {
-  return Promise.all(ids.map(id => getGeyserByID(id))).then(values =>
+  if ( ids ) {
+    return Promise.all(ids.map(id => getGeyserByID(id))).then(values =>
+      values.filter(value => !!value)
+    )
+  }
+
+  return geysers().then(values =>
     values.filter(value => !!value)
   )
 }
