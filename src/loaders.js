@@ -7,6 +7,7 @@ const {
   getPredictions,
   getPredictionByGeyserID,
   getRecentEruptions,
+  getEruptions,
   getEruptionByID,
   getLastEruptionByGeyserID,
 } = require('./resolvers')
@@ -30,6 +31,10 @@ const recentEruptionsLoader = new DataLoader(keys =>
   Promise.all(keys.map(getRecentEruptions))
 )
 
+const eruptionsLoader = new DataLoader(keys =>
+  Promise.all(keys.map(getEruptions))
+)
+
 const eruptionLoader = new DataLoader(keys =>
   Promise.all(keys.map(getEruptionByID))
 )
@@ -44,6 +49,7 @@ module.exports = {
   prediction: predictionLoader,
   predictions: predictionsLoader,
   eruption: eruptionLoader,
+  eruptions: eruptionsLoader,
   recentEruptions: recentEruptionsLoader,
   lastEruption: lastEruptionLoader
 }

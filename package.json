@@ -1,6 +1,6 @@
 {
   "name": "geysertimes-graphql-core",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "",
   "main": "app.js",
   "scripts": {
@@ -21,6 +21,7 @@
     "express": "^4.17.1",
     "express-graphql": "^0.9.0",
     "graphql": "^15.0.0",
+    "moment-timezone": "^0.5.28",
     "node-fetch": "^2.6.0"
   }
 }

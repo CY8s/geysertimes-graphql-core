@@ -1,8 +1,9 @@
 // import fetch from 'node-fetch';
 const fetch = require('node-fetch')
+const moment = require('moment-timezone');
 
 // import schema from './schema';
-const schema = require('./schema')
+const schema = require('./schema');
 
 const BASE_URL = 'https://www.geysertimes.org/api/v5'
 
@@ -114,6 +115,77 @@ function getRecentEruptions ({ geysers, range, offset }) {
     )
 }
 
+function changeTimezone(date, ianatz) {
+
+  console.log("Change Timezone");
+
+  var utcdate = new Date(date.toLocaleString('en-US', {
+    timeZone: 'Etc/GMT'
+  }));
+
+  // suppose the date is 12:00 UTC
+  var invdate = new Date(date.toLocaleString('en-US', {
+    timeZone: ianatz
+  }));
+
+  // then invdate will be 07:00 in Toronto
+  // and the diff is 5 hours
+  var diff = utcdate.getTime() - invdate.getTime();
+
+  // so 12:00 in Toronto is 17:00 UTC
+  return new Date(date.getTime() + diff);
+
+}
+
+function getUTCDateByString(dateString) {
+  const [year, month, day] = dateString.split('-');
+  return new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day)));
+}
+
+function getEruptions( { geysers, startDate, endDate} ) {
+  geysers = geysers || []
+  
+  startDate = startDate || "2020-04-24";
+  endDate = endDate || startDate;
+
+  const start = moment(startDate).unix();
+  const end = moment(endDate).add(1, 'd').unix() - 1;
+
+  console.log(start);
+  console.log(end);
+
+  let url = `${BASE_URL}/entries/${start}/${end}`
+
+  geysers = geysers // .map(geyser => parseInt(geyser))
+    .filter((value, index, self) => self.indexOf(value) === index)
+    .filter(geyser => geyser)
+
+  if (geysers.length) {
+    url += `/${geysers.join(';')}`
+  }
+
+  return fetch(url)
+    .then(res => res.json())
+    .then(json =>
+      json.entries
+        .filter(eruption => eruption.primaryID == eruption.eruptionID)
+        .sort((a, b) => {
+          const timeA = parseInt(a.time)
+          const timeB = parseInt(b.time)
+
+          if (timeA < timeB) {
+            return 1
+          }
+
+          if (timeA > timeB) {
+            return -1
+          }
+
+          return 0
+        })
+    )
+}
+
 function getEruptionByID (id) {
   return fetch(`${BASE_URL}/entries/${id}`)
     .then(res => res.json())
@@ -168,56 +240,7 @@ module.exports = {
   getPredictions,
   getPredictionByGeyserID,
   getRecentEruptions,
+  getEruptions,
   getEruptionByID,
   getLastEruptionByGeyserID
 }
-
-/*const app = express()
-
-app.use(
-  graphqlHTTP(req => {
-    const geyserLoader = new DataLoader(keys =>
-      Promise.all(keys.map(getGeyserByID))
-    )
-
-    const geysersLoader = new DataLoader(keys =>
-      Promise.all(keys.map(getGeysersByID))
-    )
-
-    const predictionsLoader = new DataLoader(keys =>
-      Promise.all(keys.map(getPredictions))
-    )
-    const predictionLoader = new DataLoader(keys =>
-      Promise.all(keys.map(getPredictionByGeyserID))
-    )
-
-    const recentEruptionsLoader = new DataLoader(keys =>
-      Promise.all(keys.map(getRecentEruptions))
-    )
-
-    const eruptionLoader = new DataLoader(keys =>
-      Promise.all(keys.map(getEruptionByID))
-    )
-
-    const lastEruptionLoader = new DataLoader(keys =>
-      Promise.all(keys.map(getLastEruptionByGeyserID))
-    )
-
-    const loaders = {
-      geyser: geyserLoader,
-      geysers: geysersLoader,
-      prediction: predictionLoader,
-      predictions: predictionsLoader,
-      eruption: eruptionLoader,
-      recentEruptions: recentEruptionsLoader,
-      lastEruption: lastEruptionLoader
-    }
-    return {
-      context: { loaders },
-      schema,
-      graphiql: true
-    }
-  })
-)
-
-module.exports = { app };*/

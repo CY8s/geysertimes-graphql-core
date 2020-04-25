@@ -156,14 +156,14 @@ const QueryType = new GraphQLObjectType({
         geysers: {
           type: new GraphQLList(GraphQLString)
         },
-        range: {
-          type: GraphQLInt
+        startDate: {
+          type: GraphQLString
         },
-        offset: {
-          type: GraphQLInt
+        endDate: {
+          type: GraphQLString
         }
       },
-      resolve: (root, args, { loaders }) => loaders.recentEruptions.load(args)
+      resolve: (root, args, { loaders }) => loaders.eruptions.load(args)
     },
     eruption: {
       type: EruptionType,
