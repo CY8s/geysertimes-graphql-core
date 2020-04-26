@@ -115,33 +115,6 @@ function getRecentEruptions ({ geysers, range, offset }) {
     )
 }
 
-function changeTimezone(date, ianatz) {
-
-  console.log("Change Timezone");
-
-  var utcdate = new Date(date.toLocaleString('en-US', {
-    timeZone: 'Etc/GMT'
-  }));
-
-  // suppose the date is 12:00 UTC
-  var invdate = new Date(date.toLocaleString('en-US', {
-    timeZone: ianatz
-  }));
-
-  // then invdate will be 07:00 in Toronto
-  // and the diff is 5 hours
-  var diff = utcdate.getTime() - invdate.getTime();
-
-  // so 12:00 in Toronto is 17:00 UTC
-  return new Date(date.getTime() + diff);
-
-}
-
-function getUTCDateByString(dateString) {
-  const [year, month, day] = dateString.split('-');
-  return new Date(Date.UTC(parseInt(year), parseInt(month) - 1, parseInt(day)));
-}
-
 function getEruptions( { geysers, startDate, endDate} ) {
   geysers = geysers || []
   
@@ -150,9 +123,6 @@ function getEruptions( { geysers, startDate, endDate} ) {
 
   const start = moment(startDate).unix();
   const end = moment(endDate).add(1, 'd').unix() - 1;
-
-  console.log(start);
-  console.log(end);
 
   let url = `${BASE_URL}/entries/${start}/${end}`
 
